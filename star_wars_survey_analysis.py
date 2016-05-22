@@ -7,68 +7,70 @@ import matplotlib.pyplot as plt
 # import data
 star_wars = pd.read_csv("star_wars_survey.csv", encoding="ISO-8859-1")
 
-# remove respondents without ID
-star_wars = star_wars[pd.notnull(star_wars["RespondentID"])]
+# rename column names that contain answers to which episode has been seen
+episodes_seen_list = ["Episode I_seen", "Episode II_seen", "Episode III_seen",
+                      "Episode IV_seen", "Episode V_seen", "Episode VI_seen"] 
+old_column_names = star_wars.columns[3:9].tolist()
+new_column_names = episodes_seen_list
 
-# rename yes/no answers if they have seen any of the Star Wars movies
-# to True/False 
-yes_no ={
-    "Yes": True,
-    "No": False
-}
+rename_seen_movie_columns = dict(zip(old_column_names, new_column_names))
+star_wars = star_wars.rename(columns=rename_seen_movie_columns)
 
-any_6 = "Have you seen any of the 6 films in the Star Wars franchise?"
-consider_fan = "Do you consider yourself to be a fan of the Star Wars film franchise?"
-star_wars[any_6] = star_wars[any_6].map(yes_no)
-star_wars[consider_fan] = star_wars[consider_fan].replace(yes_no)
+# rename ranking column names for each episode
+episodes_ranking_list = ["Episode I_ranking", "Episode II_ranking", "Episode III_ranking",
+                      "Episode IV_ranking", "Episode V_ranking", "Episode VI_ranking"] 
+old_column_names = star_wars.columns[9:15].tolist()
+new_column_names = episodes_ranking_list
 
-# change column entries from movie name that has been seen to True or False
-seen_or_not = {
-    np.nan: False,
-    "Star Wars: Episode I  The Phantom Menace" : True,
-    "Star Wars: Episode II  Attack of the Clones": True,
-    "Star Wars: Episode III  Revenge of the Sith": True,
-    "Star Wars: Episode IV  A New Hope": True,
-    "Star Wars: Episode V The Empire Strikes Back": True,
-    "Star Wars: Episode VI Return of the Jedi": True
-}
-
-for col in star_wars.columns[3:9]:
-    star_wars[col] = star_wars[col].replace(seen_or_not)
-
-# rename column names that contain answers to which movie has been seen
-rename_seen_or_not_columns = {
-    "Which of the following Star Wars films have you seen? Please select all that apply.": "seen_1",
-    "Unnamed: 4": "seen_2",
-    "Unnamed: 5": "seen_3",
-    "Unnamed: 6": "seen_4",
-    "Unnamed: 7": "seen_5",
-    "Unnamed: 8": "seen_6"
-    }
-star_wars = star_wars.rename(columns=rename_seen_or_not_columns)
-
-# convert ranking columns to floats
-star_wars[star_wars.columns[9:15]] = star_wars[star_wars.columns[9:15]].astype(float)
-
-# rename ranking column names
-rename_ranking_columns = {
-    "Please rank the Star Wars films in order of preference with 1 being your favorite film in the franchise and 6 being your least favorite film.": "ranking_1",
-    "Unnamed: 10": "ranking_2",
-    "Unnamed: 11": "ranking_3",
-    "Unnamed: 12": "ranking_4",
-    "Unnamed: 13": "ranking_5",
-    "Unnamed: 14": "ranking_6"
-    }
+rename_ranking_columns = dict(zip(old_column_names, new_column_names))
 star_wars = star_wars.rename(columns=rename_ranking_columns)
 
-# calculate the mean ranking for each film
+# add character names of favorite ranking from row 0 to column names, 
+old_column_names = star_wars.columns[15:29].tolist()
+new_column_names = star_wars[star_wars.columns[15:29]].iloc[0].values.tolist()
+
+rename_character_ranking_columns = dict(zip(old_column_names,
+                                                      new_column_names))
+star_wars = star_wars.rename(columns=rename_character_ranking_columns)
+
+# remove respondents without ID (second header row)
+star_wars = star_wars[pd.notnull(star_wars["RespondentID"])]
+
+# rename yes/no/nan answers if the participants have seen any of the Star Wars
+# movies or consider themselves star wars fans to True/False 
+yes_no_rename = dict(zip(["Yes", "No", np.nan], [True, False, False]))
+
+any_episode_seen = "Have you seen any of the 6 films in the Star Wars franchise?"
+consider_fan = "Do you consider yourself to be a fan of the Star Wars film franchise?"
+star_wars[any_episode_seen] = star_wars[any_episode_seen].replace(yes_no_rename)
+star_wars[consider_fan] = star_wars[consider_fan].replace(yes_no_rename)
+
+# change column entries from movie name that has been seen to True or False
+old_row_values = pd.unique(star_wars[
+    star_wars.columns[3:9]].values.ravel()).tolist() # find unique values in survey columns
+new_row_values = [True for i in range(6)]
+new_row_values.append(False)
+
+seen_or_not_rename = dict(zip(old_row_values, new_row_values))
+
+for col in star_wars.columns[3:9]:
+    star_wars[col] = star_wars[col].replace(seen_or_not_rename)
+
+# convert values in ranking columns to floats
+star_wars[star_wars.columns[9:15]] = star_wars[star_wars.columns[9:15]].astype(float)
+
+# calculate the mean ranking for each star wars film
 mean_rankings = star_wars[star_wars.columns[9:15]].mean()
 
-# plot mean rankings in a bar plot
+# plot mean rankings in a bar plot for each episode
 fig1 = plt.figure()
 ax = fig1.add_subplot(1, 1, 1)
 
-ax.set(xlabel="Episode Number", ylabel="Mean Ranking", xticks=(np.arange(6) + 0.5), xticklabels=mean_rankings.index.tolist())
+ax.set(title="Rankings for each Episode",
+       ylabel="Mean Ranking",
+       xticks=(np.arange(6) + 0.5), xticklabels=["Episode I", "Episode II",
+                                                 "Episode III", "Episode IV",
+                                                 "Episode V", "Episode VI"])
 ax.bar(range(6), mean_rankings)
 plt.show()
 
@@ -79,7 +81,11 @@ sum_seens = star_wars[star_wars.columns[3:9]].sum()
 fig2 = plt.figure()
 ax = fig2.add_subplot(1, 1, 1)
 
-ax.set(xlabel="Episode Number", ylabel="#People Who Have Seen The Movie", xticks=(np.arange(6) + 0.5), xticklabels=sum_seens.index.tolist())
+ax.set(title="Viewer Number for each Episode",
+       ylabel="Viewer Number",
+       xticks=(np.arange(6) + 0.5), xticklabels=["Episode I", "Episode II",
+                                                 "Episode III", "Episode IV",
+                                                 "Episode V", "Episode VI"])
 ax.bar(range(6), sum_seens)
 plt.show()
 
@@ -105,13 +111,24 @@ ax2 = fig3.add_subplot(2, 2, 2)
 ax3 = fig3.add_subplot(2, 2, 3)
 ax4 = fig3.add_subplot(2, 2, 4)
 
-ax1.set(ylabel="# People")
-ax3.set(ylabel="Mean Ranking")
+ax1.set(ylabel="Viewer Number",
+        xticks=(np.arange(6) + 0.5), xticklabels=["E I", "E II",
+                                                  "E III", "E IV",
+                                                  "E V", "E VI"])
+ax2.set(xticks=(np.arange(6) + 0.5), xticklabels=["E I", "E II",
+                                                  "E III", "E IV",
+                                                  "E V", "E VI"])
+ax3.set(ylabel="Mean Ranking",
+        xticks=(np.arange(6) + 0.5), xticklabels=["E I", "E II",
+                                                  "E III", "E IV",
+                                                  "E V", "E VI"])
+ax4.set(xticks=(np.arange(6) + 0.5), xticklabels=["E I", "E II",
+                                                  "E III", "E IV",
+                                                  "E V", "E VI"])
 ax1.bar(range(6), sum_seens_sw_fans)
 ax2.bar(range(6), sum_seens_not_sw_fans)
 ax3.bar(range(6), mean_rankings_sw_fans)
 ax4.bar(range(6), mean_rankings_not_sw_fans)
 plt.show()
-
 
 
