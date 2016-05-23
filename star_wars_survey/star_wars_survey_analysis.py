@@ -168,7 +168,7 @@ plt.show()
 mean_rankings_characters = star_wars[star_wars.columns[15:29]].mean()
 
 # create scatter plot of character ranking results
-fig4 = plt.figure()
+fig4 = plt.figure(figsize=(13,6))
 ax = fig4.add_subplot(1, 1, 1)
 
 x_labels = [label.replace(" ", "\n") for label in star_wars.columns[15:29].tolist()]
