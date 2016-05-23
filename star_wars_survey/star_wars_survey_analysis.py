@@ -186,7 +186,7 @@ ax.set(title="Character Rankings",
        xlim=[-0.5, 14.5],
        ylim=[-2.2, 2.2],
        xticks=np.arange(14) + 0.4,
-       xticklabels=x_labels, #star_wars.columns[15:29].tolist(),
+       xticklabels=x_labels,
        yticks=[-2, -1, 0, 1, 2],
        yticklabels=y_labels)
 
