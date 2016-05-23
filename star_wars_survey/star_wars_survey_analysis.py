@@ -7,7 +7,6 @@ import matplotlib.pyplot as plt
 # import data
 star_wars = pd.read_csv("star_wars_survey.csv", encoding="ISO-8859-1")
 
-
 def rename_column_names(df, old_column_names, new_column_names):
     """ Rename column names of specified dataframe to the new values."""
     
