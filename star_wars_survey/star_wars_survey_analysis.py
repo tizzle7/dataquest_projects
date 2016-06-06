@@ -105,7 +105,6 @@ ax.set(title="Rankings for each Episode",
                                                  "Episode III", "Episode IV",
                                                  "Episode V", "Episode VI"])
 ax.bar(range(6), mean_rankings)
-plt.show()
 
 # calculate how many people have seen each movie
 sum_seens = star_wars[star_wars.columns[3:9]].sum()
@@ -120,7 +119,6 @@ ax.set(title="Viewer Number for each Episode",
                                                  "Episode III", "Episode IV",
                                                  "Episode V", "Episode VI"])
 ax.bar(range(6), sum_seens)
-plt.show()
 
 # split dataframe into participants that consider themselves star wars fans
 # or not
@@ -162,7 +160,6 @@ ax1.bar(range(6), sum_seens_sw_fans)
 ax2.bar(range(6), sum_seens_not_sw_fans)
 ax3.bar(range(6), mean_rankings_sw_fans)
 ax4.bar(range(6), mean_rankings_not_sw_fans)
-plt.show()
 
 # calculate the mean ranking for each character
 mean_rankings_characters = star_wars[star_wars.columns[15:29]].mean()
